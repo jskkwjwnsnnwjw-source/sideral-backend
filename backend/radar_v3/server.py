@@ -96,7 +96,7 @@ def handler_for(store):
     class Handler(BaseHTTPRequestHandler):
         def end_headers(self):
             origin = self.headers.get('Origin',''); parsed = urlparse(origin)
-            allowed = set(os.environ.get('RADAR_V3_ORIGINS','https://sideralmeteorologiabrasil.web.app').split(','))
+            allowed = set(os.environ.get('RADAR_V3_ORIGINS','https://sideralmeteorologia.com.br,https://www.sideralmeteorologia.com.br,https://sideralmeteorologiabrasil.web.app,https://sideralmeteorologia.progames12301.workers.dev').split(','))
             if origin in allowed or (parsed.scheme=='http' and parsed.hostname in ('localhost','127.0.0.1')):
                 self.send_header('Access-Control-Allow-Origin', origin)
                 self.send_header('Vary','Origin')
