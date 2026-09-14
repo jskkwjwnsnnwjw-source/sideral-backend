@@ -102,7 +102,16 @@ class Adapter:
                         product='reflectivity' if label.startswith('CAPPI') else ('velocity' if 'VENTO' in label or ('VENTO' in info and label.startswith('PPI')) else None)
                         if product and product not in radar['codes']:
                             radar['codes'][product]=str(code);radar['advertisedProducts'].append(product)
-                self.catalog=sorted(grouped.values(),key=lambda r:(r['id']!='cptec-chapeco',r['name']));self.expires=time.time()+3600
+                now=dt.datetime.now(dt.timezone.utc);radar_index=self.radar_data()
+                for radar in grouped.values():
+                    for product,code in radar['codes'].items():
+                        rows=radar_index.get(code,[])
+                        try:
+                            newest=max(dt.datetime.fromisoformat(row['fileDate']+'T'+row['fileTime']).replace(tzinfo=dt.timezone.utc) for row in rows)
+                        except (ValueError,KeyError,TypeError):
+                            continue
+                        if 0<=(now-newest).total_seconds()<=48*3600: radar['products'].append(product)
+                self.catalog=sorted(grouped.values(),key=lambda r:(not bool(r['products']),r['id']!='cptec-chapeco',r['name']));self.expires=time.time()+300
             except (requests.RequestException,ValueError):
                 self.expires=time.time()+60
             return self.catalog
